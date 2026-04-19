@@ -1,0 +1,5 @@
+# Production Deployment Recommendation
+
+While the current architecture successfully leverages local threading and in-memory bounded queues to manage concurrency and back pressure on a single machine, scaling this to a production environment requires a distributed approach. 
+
+To achieve high availability and handle massive throughput, the native `queue.Queue` should be replaced with a distributed message broker like Apache Kafka or RabbitMQ. This allows multiple independent crawler workers to consume URLs without memory bottlenecks. The shared in-memory `visited` set and search index should be migrated to a distributed datastore like Redis (for ultra-fast URL deduplication) and Elasticsearch (for concurrent, full-text search indexing), decoupling the scraping logic from the search and storage layers entirely.
