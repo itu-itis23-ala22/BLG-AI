@@ -2,6 +2,7 @@
 
 ## Agent Roles and Responsibilities
 To design this concurrent web crawler, I established a multi-agent workflow focusing on dividing architectural concerns from specific implementation details.
+Detailed responsibilities and the specific AI prompts used for each agent can be found in the `/agents` directory.
 
 1. **The Architect Agent:** Responsible for the overall system design. This agent decided to use Python's native `threading` and `queue.Queue` modules to implement the shared state, ensuring the system runs on a single machine while supporting concurrent reads and writes.
 2. **The Crawler (Indexer) Agent:** Tasked with building the `index(origin, k)` method. This agent utilized `urllib` and `html.parser` to traverse links up to depth `k` without visiting the same page twice. 
