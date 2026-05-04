@@ -1,6 +1,11 @@
 # Production Deployment Notes
 ## WikiRAG - Local Wikipedia RAG Assistant
 
+**Student:** Enis Ersan Ala  
+**Student Number:** 150220084  
+**Repository:** [BLG-AI / hw3](https://github.com/itu-itis23-ala22/BLG-AI/tree/main/hw3)  
+**Demo:** [HW3 Demo Video Folder](https://drive.google.com/drive/folders/1DauYiSYeRHDYs3wtop5wPzfD68LHyNad?usp=drive_link)
+
 This document describes how the current local demo could be prepared for a real production environment. The project is intentionally small right now, so the recommendations below focus on the areas that would matter first: packaging, serving, storage, monitoring, and security.
 
 ---

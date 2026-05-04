@@ -2,6 +2,13 @@
 
 WikiRAG is a small local RAG application that answers questions about famous people and places using Wikipedia articles. After the first setup and data ingestion steps, the retrieval store, chat interface, embedding model, and language model all run on the local machine.
 
+## Project Info
+
+- **Student:** Enis Ersan Ala
+- **Student Number:** 150220084
+- **GitHub Repository:** [BLG-AI / hw3](https://github.com/itu-itis23-ala22/BLG-AI/tree/main/hw3)
+- **Demo Video Folder:** [HW3 Demo](https://drive.google.com/drive/folders/1DauYiSYeRHDYs3wtop5wPzfD68LHyNad?usp=drive_link)
+
 ## Architecture
 
 ```
@@ -175,7 +182,11 @@ The local LLM receives only the retrieved chunks plus the user question. The pro
 
 ## Demo Video
 
-[Link to demo video]
+[HW3 Demo Video Folder](https://drive.google.com/drive/folders/1DauYiSYeRHDYs3wtop5wPzfD68LHyNad?usp=drive_link)
+
+## Repository
+
+[GitHub Repository](https://github.com/itu-itis23-ala22/BLG-AI/tree/main/hw3)
 
 ## License
 

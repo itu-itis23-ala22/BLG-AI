@@ -1,6 +1,11 @@
 # Product Requirements Document
 ## WikiRAG - Local Wikipedia RAG Assistant
 
+**Student:** Enis Ersan Ala  
+**Student Number:** 150220084  
+**Repository:** [BLG-AI / hw3](https://github.com/itu-itis23-ala22/BLG-AI/tree/main/hw3)  
+**Demo:** [HW3 Demo Video Folder](https://drive.google.com/drive/folders/1DauYiSYeRHDYs3wtop5wPzfD68LHyNad?usp=drive_link)
+
 ### 1. Overview
 
 WikiRAG is a local Retrieval-Augmented Generation system for answering questions about well-known people and places. It collects Wikipedia text, retrieves the most relevant passages, and asks a local language model to answer from that context. The goal is to keep the full pipeline on the user's own machine.
