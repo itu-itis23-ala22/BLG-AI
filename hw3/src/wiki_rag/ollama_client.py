@@ -47,6 +47,21 @@ class OllamaClient:
         )
         return str(response.get("response", "")).strip()
 
+    def list_models(self) -> list[str]:
+        """Return locally available Ollama model names."""
+        response = self._get("/api/tags", timeout=15)
+        models = response.get("models", [])
+        return sorted(str(model.get("name", "")) for model in models if model.get("name"))
+
+    def has_model(self, model_name: str) -> bool:
+        """Check both exact names and Ollama tags such as `model:latest`."""
+        available = set(self.list_models())
+        if model_name in available:
+            return True
+        if ":" not in model_name:
+            return f"{model_name}:latest" in available
+        return False
+
     def _post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.host.rstrip('/')}{path}"
         request = urllib.request.Request(
@@ -58,6 +73,27 @@ class OllamaClient:
         try:
             with urllib.request.urlopen(request, timeout=120) as response:
                 return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace").strip()
+            raise RuntimeError(
+                f"Ollama request failed for model `{payload.get('model')}`. "
+                "Make sure the model is pulled locally. "
+                f"Server response: {detail or exc.reason}"
+            ) from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(
+                "Could not reach Ollama. Start it with `ollama serve` and pull the required models."
+            ) from exc
+
+    def _get(self, path: str, timeout: int = 120) -> dict[str, Any]:
+        url = f"{self.host.rstrip('/')}{path}"
+        request = urllib.request.Request(url, method="GET")
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace").strip()
+            raise RuntimeError(f"Ollama request failed: {detail or exc.reason}") from exc
         except urllib.error.URLError as exc:
             raise RuntimeError(
                 "Could not reach Ollama. Start it with `ollama serve` and pull the required models."

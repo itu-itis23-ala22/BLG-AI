@@ -1,6 +1,6 @@
-GITHUB REPO Link: https://github.com/itu-itis23-ala22/BLG-AI/edit/main/hw3
+GITHUB REPO Link: https://github.com/itu-itis23-ala22/BLG-AI/tree/main/hw3
 
-DEMO VIDEO link:
+DEMO VIDEO link: Add the Loom or unlisted YouTube demo URL here before submission.
 
 
 # Local Wikipedia RAG Assistant
@@ -77,6 +77,12 @@ Check the store:
 python main.py status
 ```
 
+Verify the local environment, Ollama connection, model availability, and vector store:
+
+```bash
+python main.py doctor
+```
+
 ## Ask Questions
 
 One-shot question:
@@ -104,6 +110,16 @@ Reset stored vectors:
 ```bash
 python main.py reset
 ```
+
+## Submission Checklist
+
+- Public GitHub repository contains this `hw3` project folder.
+- `README.md`, `Product_prd.md`, and `recommendation.md` are included.
+- `requirements.txt` is included.
+- `main.py` and `src/wiki_rag/` contain ingestion, vector store creation, retrieval, generation, and CLI chat code.
+- Before recording the demo, run `python main.py doctor` and confirm both Ollama models are available.
+- Record a 5 minute Loom or unlisted YouTube demo and replace the demo video line at the top of this README with the final URL.
+- In the demo, show `python main.py ingest --reset`, `python main.py ask ... --show-sources`, and `python main.py chat --show-sources`.
 
 ## Example Queries
 

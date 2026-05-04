@@ -16,6 +16,7 @@ Build a ChatGPT-style local assistant that answers questions about famous people
 - As a user, I can ask questions in a chat-style CLI.
 - As a user, I can see which retrieved chunks were used.
 - As a user, I can reset local data and rebuild the index.
+- As a user, I can run a local readiness check before recording the demo.
 - As an evaluator, I can run the system by following only the README.
 
 ## Functional Requirements
@@ -30,6 +31,7 @@ Build a ChatGPT-style local assistant that answers questions about famous people
 - Generate answers using a local LLM.
 - Return `I don't know.` when retrieved context is insufficient.
 - Provide a CLI for one-shot questions and interactive chat.
+- Provide a `doctor` command that checks Ollama model availability and vector store status.
 
 ## Non-Functional Requirements
 
@@ -60,6 +62,7 @@ The implementation uses Option B from the assignment: one vector store with meta
 
 - `python main.py ingest --reset` builds the index.
 - `python main.py ask "What did Marie Curie discover?" --show-sources` returns a grounded answer and sources.
+- `python main.py doctor` reports the required local Ollama models and whether the vector store has data.
 - Person questions retrieve person chunks.
 - Place questions retrieve place chunks.
 - Mixed comparison questions can retrieve both types.

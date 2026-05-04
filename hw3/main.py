@@ -37,38 +37,45 @@ def main() -> None:
     chat_parser.add_argument("--top-k", type=int, default=6)
 
     subparsers.add_parser("status", help="Show vector store status")
+    subparsers.add_parser("doctor", help="Check local dependencies, Ollama, models, and vector store")
     subparsers.add_parser("reset", help="Delete local vector store files")
 
     args = parser.parse_args()
 
-    if args.command == "ingest":
-        ollama, store = _runtime(args)
-        from wiki_rag.ingest import ingest_default_dataset
+    try:
+        if args.command == "ingest":
+            ollama, store = _runtime(args)
+            from wiki_rag.ingest import ingest_default_dataset
 
-        result = ingest_default_dataset(store=store, ollama=ollama, reset=args.reset)
-        print(f"Ingested {result.documents} Wikipedia documents.")
-        print(f"Created/upserted {result.chunks} chunks.")
-        print(f"Vector store now contains {result.collection_count} chunks.")
-    elif args.command == "ask":
-        ollama, store = _runtime(args)
-        from wiki_rag.rag import LocalWikipediaRag
+            result = ingest_default_dataset(store=store, ollama=ollama, reset=args.reset)
+            print(f"Ingested {result.documents} Wikipedia documents.")
+            print(f"Created/upserted {result.chunks} chunks.")
+            print(f"Vector store now contains {result.collection_count} chunks.")
+        elif args.command == "ask":
+            ollama, store = _runtime(args)
+            from wiki_rag.rag import LocalWikipediaRag
 
-        rag = LocalWikipediaRag(store=store, ollama=ollama)
-        result = rag.answer(args.question, top_k=args.top_k)
-        print(result.answer)
-        if args.show_sources:
-            _print_sources(result.sources)
-    elif args.command == "chat":
-        ollama, store = _runtime(args)
-        _chat_loop(store=store, ollama=ollama, show_sources=args.show_sources, top_k=args.top_k)
-    elif args.command == "status":
-        _, store = _runtime(args)
-        print(f"Chroma path: {CHROMA_DIR}")
-        print(f"Stored chunks: {store.count()}")
-    elif args.command == "reset":
-        if CHROMA_DIR.exists():
-            shutil.rmtree(CHROMA_DIR)
-        print("Local vector store reset complete.")
+            rag = LocalWikipediaRag(store=store, ollama=ollama)
+            result = rag.answer(args.question, top_k=args.top_k)
+            print(result.answer)
+            if args.show_sources:
+                _print_sources(result.sources)
+        elif args.command == "chat":
+            ollama, store = _runtime(args)
+            _chat_loop(store=store, ollama=ollama, show_sources=args.show_sources, top_k=args.top_k)
+        elif args.command == "status":
+            _, store = _runtime(args)
+            print(f"Chroma path: {CHROMA_DIR}")
+            print(f"Stored chunks: {store.count()}")
+        elif args.command == "doctor":
+            ollama, store = _runtime(args)
+            _doctor(ollama=ollama, store=store, args=args)
+        elif args.command == "reset":
+            if CHROMA_DIR.exists():
+                shutil.rmtree(CHROMA_DIR)
+            print("Local vector store reset complete.")
+    except RuntimeError as exc:
+        raise SystemExit(f"Error: {exc}") from exc
 
 
 def _runtime(args: argparse.Namespace) -> tuple[Any, Any]:
@@ -126,6 +133,31 @@ def _chat_loop(store: Any, ollama: Any, show_sources: bool, top_k: int) -> None:
         print(f"\nAssistant: {result.answer}")
         if show_sources:
             _print_sources(result.sources)
+
+
+def _doctor(ollama: Any, store: Any, args: argparse.Namespace) -> None:
+    print("Python dependencies: OK")
+    print(f"Chroma path: {CHROMA_DIR}")
+    print(f"Stored chunks: {store.count()}")
+
+    models = ollama.list_models()
+    print(f"Ollama host: {args.ollama_host}")
+    print(f"Available Ollama models: {', '.join(models) if models else 'none'}")
+
+    for label, model in (("Embedding model", args.embed_model), ("LLM model", args.llm_model)):
+        status = "OK" if _model_present(models, model) else "MISSING"
+        print(f"{label}: {model} [{status}]")
+
+    if store.count() == 0:
+        print("Vector store is empty. Run `python main.py ingest --reset` before the demo.")
+
+
+def _model_present(models: list[str], model_name: str) -> bool:
+    if model_name in models:
+        return True
+    if ":" not in model_name:
+        return f"{model_name}:latest" in models
+    return False
 
 
 def _print_sources(sources) -> None:
