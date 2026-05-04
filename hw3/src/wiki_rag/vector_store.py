@@ -68,8 +68,9 @@ class WikiVectorStore:
         query_embedding: list[float],
         scope: QueryScope = "both",
         top_k: int = 6,
+        title: str | None = None,
     ) -> list[RetrievedChunk]:
-        where = None if scope == "both" else {"entity_type": scope}
+        where = _build_where(scope=scope, title=title)
         result = self.collection.query(
             query_embeddings=[query_embedding],
             n_results=top_k,
@@ -84,4 +85,17 @@ class WikiVectorStore:
             RetrievedChunk(text=document, metadata=metadata, distance=float(distance))
             for document, metadata, distance in zip(documents, metadatas, distances)
         ]
+
+
+def _build_where(scope: QueryScope, title: str | None) -> dict | None:
+    filters = []
+    if scope != "both":
+        filters.append({"entity_type": scope})
+    if title:
+        filters.append({"title": title})
+    if not filters:
+        return None
+    if len(filters) == 1:
+        return filters[0]
+    return {"$and": filters}
 

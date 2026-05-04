@@ -49,6 +49,7 @@ def _build_prompt(query: str, sources: list[RetrievedChunk]) -> str:
 Answer the user's question using only the context below.
 If the context does not contain enough information, answer exactly: I don't know.
 Do not use outside knowledge.
+For comparison questions, compare the entities using separate facts from the provided context; the context does not need to contain a pre-written comparison.
 When useful, mention source titles in plain text.
 
 Context:
