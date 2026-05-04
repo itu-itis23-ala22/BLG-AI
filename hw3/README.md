@@ -1,3 +1,7 @@
+GITHUB REPO Link: https://github.com/itu-itis23-ala22/BLG-AI/edit/main/hw3
+DEMO VIDEO link:
+
+
 # Local Wikipedia RAG Assistant
 
 This project is a fully local retrieval augmented generation system for BLG483E HW3. It ingests Wikipedia pages for famous people and famous places, chunks the articles, creates local embeddings with Ollama, stores vectors in a persistent Chroma collection, retrieves relevant chunks, and answers questions with a local Ollama language model.
@@ -152,17 +156,6 @@ export OLLAMA_LLM_MODEL=llama3.2:3b
 export OLLAMA_EMBED_MODEL=nomic-embed-text
 ```
 
-## Demo Video
-
-Submission requires a 5-minute Loom or unlisted YouTube video. Record the following:
-
-1. Brief system overview.
-2. `python main.py ingest --reset`.
-3. `python main.py ask "...question..." --show-sources`.
-4. `python main.py chat --show-sources`.
-5. Explain the one-store-with-metadata design, local Ollama models, retrieval filtering, limitations, and improvements.
-
-Demo video link: add the final Loom or YouTube URL here before submission.
 
 ## Notes and Limitations
 
