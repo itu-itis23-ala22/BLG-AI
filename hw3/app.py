@@ -30,91 +30,97 @@ st.set_page_config(
 # Styling used by the Streamlit page
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
     /* Base font */
     .stApp {
-        font-family: 'DM Sans', sans-serif;
+        font-family: 'Outfit', sans-serif;
+        background:
+            radial-gradient(circle at top left, rgba(124, 58, 237, 0.18), transparent 32rem),
+            radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.12), transparent 28rem),
+            #111016;
     }
 
     /* Top banner */
     .main-header {
-        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-        padding: 2rem 2.5rem;
-        border-radius: 20px;
-        margin-bottom: 1.75rem;
-        color: white;
-        text-align: center;
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(120deg, #2e1065 0%, #4c1d95 52%, #92400e 100%);
+        padding: 2.15rem 2.5rem;
+        border-radius: 10px 34px 10px 34px;
+        margin-bottom: 1.8rem;
+        color: #fff7ed;
+        text-align: left;
+        border: 1px solid rgba(251, 191, 36, 0.32);
+        box-shadow: 0 18px 45px rgba(17, 12, 46, 0.42);
     }
     .main-header h1 {
         margin: 0;
-        font-size: 2.2rem;
+        font-size: 2.35rem;
         font-weight: 700;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.02em;
     }
     .main-header p {
         margin: 0.6rem 0 0 0;
-        opacity: 0.75;
+        opacity: 0.86;
         font-size: 0.95rem;
-        font-weight: 300;
+        font-weight: 400;
     }
     .main-header .badge {
         display: inline-block;
-        background: rgba(56, 189, 248, 0.15);
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        color: #38bdf8;
-        padding: 0.2rem 0.75rem;
-        border-radius: 20px;
+        background: rgba(255, 247, 237, 0.12);
+        border: 1px solid rgba(251, 191, 36, 0.42);
+        color: #fbbf24;
+        padding: 0.24rem 0.85rem;
+        border-radius: 8px;
         font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
+        font-weight: 700;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         margin-bottom: 0.75rem;
     }
 
     /* Sidebar cards */
     .stat-card {
-        background: linear-gradient(145deg, #0d1117 0%, #161b22 100%);
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        border-radius: 14px;
+        background: linear-gradient(160deg, #1c1917 0%, #292524 100%);
+        border: 1px solid rgba(217, 119, 6, 0.28);
+        border-radius: 6px 20px 6px 20px;
         padding: 1rem 1.25rem;
-        margin-bottom: 0.6rem;
-        color: #c9d1d9;
-        transition: border-color 0.2s;
+        margin-bottom: 0.7rem;
+        color: #f5f5f4;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+        transition: border-color 0.2s, transform 0.2s;
     }
     .stat-card:hover {
-        border-color: rgba(56, 189, 248, 0.45);
+        border-color: rgba(251, 191, 36, 0.58);
+        transform: translateY(-1px);
     }
     .stat-card .stat-label {
         font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #6e7681;
+        color: #a8a29e;
         margin-bottom: 0.3rem;
     }
     .stat-card .stat-value {
-        font-size: 1.6rem;
+        font-size: 1.75rem;
         font-weight: 700;
-        color: #38bdf8;
+        color: #f59e0b;
     }
 
     /* Retrieved source cards */
     .source-chunk {
-        background: #0d1117;
-        border: 1px solid #21262d;
-        border-left: 3px solid #38bdf8;
-        padding: 0.8rem 1rem;
-        margin: 0.5rem 0;
-        border-radius: 0 10px 10px 0;
+        background: #1c1917;
+        border: 1px solid rgba(120, 113, 108, 0.35);
+        border-left: 5px solid #a855f7;
+        padding: 0.9rem 1rem;
+        margin: 0.6rem 0;
+        border-radius: 12px;
         font-size: 0.84rem;
         line-height: 1.6;
-        color: #c9d1d9;
+        color: #e7e5e4;
     }
     .source-entity {
-        font-weight: 600;
-        color: #38bdf8;
+        font-weight: 700;
+        color: #c084fc;
         font-size: 0.78rem;
         margin-bottom: 0.4rem;
     }
@@ -122,13 +128,13 @@ st.markdown("""
     /* Response time label */
     .latency-badge {
         display: inline-block;
-        background: rgba(56, 189, 248, 0.08);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        color: #38bdf8;
-        padding: 0.18rem 0.65rem;
-        border-radius: 20px;
+        background: rgba(124, 58, 237, 0.16);
+        border: 1px solid rgba(168, 85, 247, 0.36);
+        color: #d8b4fe;
+        padding: 0.2rem 0.7rem;
+        border-radius: 7px;
         font-size: 0.72rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-top: 0.35rem;
     }
 
