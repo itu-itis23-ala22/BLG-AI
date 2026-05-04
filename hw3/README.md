@@ -1,183 +1,182 @@
-GITHUB REPO Link: https://github.com/itu-itis23-ala22/BLG-AI/tree/main/hw3
+# WikiRAG - Local Wikipedia RAG Assistant
 
-DEMO VIDEO link: Add the Loom or unlisted YouTube demo URL here before submission.
-
-
-# Local Wikipedia RAG Assistant
-
-This project is a fully local retrieval augmented generation system for BLG483E HW3. It ingests Wikipedia pages for famous people and famous places, chunks the articles, creates local embeddings with Ollama, stores vectors in a persistent Chroma collection, retrieves relevant chunks, and answers questions with a local Ollama language model.
-
-No external LLM API is used. Wikipedia is contacted only during ingestion to download source articles.
-
-## Features
-
-- Ingests 20 famous people and 20 famous places, including every minimum entity listed in the assignment.
-- Uses overlapping chunks so long Wikipedia articles can be searched reliably.
-- Uses `nomic-embed-text` through local Ollama for embeddings.
-- Uses one Chroma vector store with metadata field `entity_type` equal to `person` or `place`.
-- Classifies each query as person, place, or both, then filters retrieval when appropriate.
-- Generates grounded answers with a local model such as `llama3.2:3b`.
-- Provides CLI commands for ingestion, one-shot questions, interactive chat, source display, status, and reset.
+WikiRAG is a small local RAG application that answers questions about famous people and places using Wikipedia articles. After the first setup and data ingestion steps, the retrieval store, chat interface, embedding model, and language model all run on the local machine.
 
 ## Architecture
 
-The project uses one vector store with metadata instead of two separate stores. This keeps comparisons simple because mixed questions can search the full collection, while person-only and place-only questions still use Chroma metadata filters.
+```
+User Question
+     │
+     ▼
+┌─────────────┐
+│  Streamlit   │  Streaming chat interface
+│  Frontend    │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐     ┌──────────────────────┐
+│  Retriever   │────▶│  Custom Vector Store  │  Cosine similarity search
+│  (classify   │     │  (NumPy + JSON)       │  with metadata-based filtering
+│   + search)  │     └──────────────────────┘
+└──────┬──────┘
+       │ top-K chunks
+       ▼
+┌─────────────┐     ┌──────────────┐
+│  Generator   │────▶│  Ollama       │  On-device LLM inference
+│  (prompt +   │     │  llama3.2:3b  │
+│   stream)    │     └──────────────┘
+└─────────────┘
+```
 
-Pipeline:
+**Vector store design:** I used the assignment's Option B: one vector store with metadata instead of separate stores for people and places. This keeps mixed questions, such as "Which famous place is in Turkey?", easier to handle. When the query looks clearly like a person or place question, the `type` metadata field narrows the search.
 
-1. `wiki_rag.wikipedia` fetches plain text Wikipedia extracts and caches them in `data/raw`.
-2. `wiki_rag.chunking` splits each article into 220-word chunks with 45-word overlap.
-3. `wiki_rag.ollama_client` calls local Ollama for embeddings and answer generation.
-4. `wiki_rag.vector_store` persists chunks, metadata, and embeddings in Chroma.
-5. `wiki_rag.retrieval` classifies the query and retrieves relevant chunks.
-6. `wiki_rag.rag` prompts the local model to answer only from retrieved context.
-7. `main.py` exposes the CLI.
+**Why the vector store is custom:** The project specification asks us to use language-native functionality where possible instead of relying on a full library for the main work. For that reason, this implementation stores metadata in JSON and uses NumPy to compute cosine similarity. It is enough for this assignment size and avoids native dependency problems.
 
-## Requirements
+## Prerequisites
 
-- Python 3.10, 3.11, or 3.12. Chroma's `onnxruntime` dependency may not yet support newer Python releases.
-- Ollama installed and running locally
-- Local Ollama models:
-  - `nomic-embed-text` for embeddings
-  - `llama3.2:3b` for answer generation
+- **Python 3.11+**
+- **Ollama** - download from [ollama.com](https://ollama.com)
 
-## Installation
+## Quick Start
 
-From the repository root:
+### 1. Install dependencies
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
+cd aia_hw3
 pip install -r requirements.txt
 ```
 
-Install and start Ollama, then pull the local models:
+### 2. Download the required Ollama models
 
+```bash
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
+```
+
+Before ingestion or chat, make sure the Ollama server is active:
 ```bash
 ollama serve
-ollama pull nomic-embed-text
-ollama pull llama3.2:3b
 ```
 
-If `ollama serve` is already running, keep it open and run the other commands in a second terminal.
-
-## Ingest Wikipedia Data
-
-Build the local vector store:
+### 3. Load Wikipedia data
 
 ```bash
-python main.py ingest --reset
+python ingest.py
 ```
 
-This downloads and caches Wikipedia pages, chunks them, embeds them locally, and stores vectors under `data/chroma`.
+During ingestion the script:
+- downloads 20 people and 20 places from Wikipedia
+- splits every article into overlapping text chunks
+- embeds the chunks locally with `nomic-embed-text`
+- saves the vectors and metadata under `data/vector_store/`
 
-Check the store:
+To delete the current local data and build the store again:
+```bash
+python ingest.py --reset
+```
+
+### 4. Launch the application
 
 ```bash
-python main.py status
+streamlit run app.py
 ```
 
-Verify the local environment, Ollama connection, model availability, and vector store:
-
-```bash
-python main.py doctor
-```
-
-## Ask Questions
-
-One-shot question:
-
-```bash
-python main.py ask "Who was Albert Einstein and what is he known for?" --show-sources
-```
-
-Interactive chat:
-
-```bash
-python main.py chat --show-sources
-```
-
-Chat commands:
-
-- `:sources on` shows retrieved chunks after each answer.
-- `:sources off` hides sources.
-- `:clear` clears the terminal screen.
-- `:reset` clears the Chroma collection.
-- `:quit` exits chat.
-
-Reset stored vectors:
-
-```bash
-python main.py reset
-```
-
-## Submission Checklist
-
-- Public GitHub repository contains this `hw3` project folder.
-- `README.md`, `Product_prd.md`, and `recommendation.md` are included.
-- `requirements.txt` is included.
-- `main.py` and `src/wiki_rag/` contain ingestion, vector store creation, retrieval, generation, and CLI chat code.
-- Before recording the demo, run `python main.py doctor` and confirm both Ollama models are available.
-- Record a 5 minute Loom or unlisted YouTube demo and replace the demo video line at the top of this README with the final URL.
-- In the demo, show `python main.py ingest --reset`, `python main.py ask ... --show-sources`, and `python main.py chat --show-sources`.
+After Streamlit starts, open `http://localhost:8501` in the browser.
 
 ## Example Queries
 
-People:
+### People
+- "Who was Albert Einstein and what is he known for?"
+- "What did Marie Curie discover?"
+- "Why is Nikola Tesla famous?"
+- "Compare Lionel Messi and Cristiano Ronaldo"
+- "What is Frida Kahlo known for?"
 
-- Who was Albert Einstein and what is he known for?
-- What did Marie Curie discover?
-- Why is Nikola Tesla famous?
-- Compare Lionel Messi and Cristiano Ronaldo.
-- What is Frida Kahlo known for?
+### Places
+- "Where is the Eiffel Tower located?"
+- "Why is the Great Wall of China important?"
+- "What was the Colosseum used for?"
+- "What is Machu Picchu?"
+- "Where is Mount Everest?"
 
-Places:
+### Mixed
+- "Which famous place is located in Turkey?"
+- "Which person is associated with electricity?"
+- "Compare Albert Einstein and Nikola Tesla"
+- "Compare the Eiffel Tower and the Statue of Liberty"
 
-- Where is the Eiffel Tower located?
-- Why is the Great Wall of China important?
-- What is Machu Picchu?
-- What was the Colosseum used for?
-- Where is Mount Everest?
+### Out-of-scope questions
+- "Who is the president of Mars?"
+- "Tell me about John Doe"
 
-Mixed and failure cases:
+For questions like these, the assistant should say that it does not have enough information.
 
-- Which famous place is located in Turkey?
-- Which person is associated with electricity?
-- Compare Albert Einstein and Nikola Tesla.
-- Compare the Eiffel Tower and the Statue of Liberty.
-- Who is the president of Mars?
-- Tell me about a random unknown person John Doe.
+## Project Structure
 
-## Local Model Configuration
-
-Defaults:
-
-- Ollama host: `http://localhost:11434`
-- LLM model: `llama3.2:3b`
-- Embedding model: `nomic-embed-text`
-
-Override with command-line flags:
-
-```bash
-python main.py ask "Where is Hagia Sophia?" \
-  --ollama-host http://localhost:11434 \
-  --llm-model mistral \
-  --embed-model nomic-embed-text
+```
+aia_hw3/
+├── app.py                    # main Streamlit chat application
+├── ingest.py                 # command line ingestion script
+├── config.py                 # shared project settings
+├── requirements.txt          # Python dependencies
+├── README.md                 # setup and usage notes
+├── product_prd.md            # product requirements document
+├── recommendation.md         # production deployment discussion
+├── project_description.txt   # assignment text
+│
+├── core/
+│   ├── __init__.py
+│   ├── wikipedia_fetcher.py  # gets article text from Wikipedia
+│   ├── chunker.py            # creates overlapping article chunks
+│   ├── embedder.py           # calls Ollama for local embeddings
+│   ├── vector_store.py       # NumPy + JSON vector storage
+│   ├── retriever.py          # query classification and retrieval
+│   ├── generator.py          # Ollama answer generation
+│   └── database.py           # SQLite records and chat history
+│
+└── data/                     # created automatically
+    ├── vector_store/         # saved vectors and chunk metadata
+    └── wiki_rag.db           # SQLite database file
 ```
 
-Or environment variables:
+## Configuration
 
-```bash
-export OLLAMA_HOST=http://localhost:11434
-export OLLAMA_LLM_MODEL=llama3.2:3b
-export OLLAMA_EMBED_MODEL=nomic-embed-text
-```
+The main parameters are collected in `config.py`:
 
+| Parameter | Default | Description |
+|---|---|---|
+| `LLM_MODEL` | `llama3.2:3b` | Ollama model used for answer generation |
+| `EMBED_MODEL` | `nomic-embed-text` | Ollama model used for embeddings |
+| `CHUNK_SIZE` | 1500 | Characters per chunk |
+| `CHUNK_OVERLAP` | 200 | Character overlap between adjacent chunks |
+| `TOP_K` | 5 | Number of chunks fetched per query |
 
-## Notes and Limitations
+## Technical Details
 
-- First ingestion can take several minutes because every chunk is embedded locally.
-- Answer quality depends on the local Ollama model and retrieved context.
-- The query classifier is intentionally simple and rule based, as allowed by the assignment.
-- If the retrieved context is insufficient, the prompt instructs the model to answer `I don't know.`
+### Chunking Strategy
+Articles are split into character-based chunks of about 1500 characters, with 200 characters of overlap. The chunker also tries to finish chunks at sentence boundaries so the retrieved text is easier for the model to use.
 
+### Query Classification
+The query classifier is rule-based. First it checks whether a known entity name or token appears in the question. If that is not enough, it looks for person/place keywords such as "who", "born", "where", and "located". Ambiguous queries search both categories.
+
+### Retrieval
+
+The retriever uses a hybrid approach because pure semantic search was not reliable enough for every question.
+
+When a named entity is present, the system first filters by that entity's metadata and then ranks matching chunks with cosine similarity. This works well for direct questions and comparisons like "Compare Messi and Ronaldo".
+
+When no specific entity is found, the system combines keyword search and semantic search. Keyword hits are useful for facts like country names or landmark terms, while vector search still helps with broader wording. Results are merged and duplicates are removed before generation.
+
+### Embedding
+The embedding model is `nomic-embed-text`. Documents are embedded with the `search_document:` prefix during ingestion, and user questions are embedded with the `search_query:` prefix at runtime.
+
+### Generation
+The local LLM receives only the retrieved chunks plus the user question. The prompt tells it not to invent missing facts, and the Streamlit app streams the answer as tokens arrive.
+
+## Demo Video
+
+[Link to demo video]
+
+## License
+
+Built for educational purposes as part of a university course assignment.

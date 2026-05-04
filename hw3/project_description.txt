@@ -1,0 +1,176 @@
+Project 3: Build a Local Wikipedia RAG
+Assistant
+Build a ChatGPT Style System Using a Local Model
+The task is to create a ChatGPT like system that can answer questions about celebrities and
+famous places using only local resources. The system must run entirely on your laptop,
+including the language model, database, and retrieval system.
+In Project 1, you built a system that indexes and retrieves information.
+In Project 2, you designed systems using AI driven workflows.
+In this project, you will combine both ideas to build a complete AI application.
+The system will ingest data from Wikipedia, process it, store it locally, and use a local language
+model to generate answers. The goal is to build a simplified retrieval augmented generation
+system.
+To the greatest extent possible please use language native functionality rather than fully
+featured libraries that do the core work of the exercise out of the box.
+Core Requirements
+Ingest
+The system should collect data from Wikipedia pages and store it locally. You should ingest at
+least:
+20 famous people
+20 famous places
+You may choose the entities, but your system must be tested with the following minimum set:
+People
+● Albert Einstein
+● Marie Curie
+● Leonardo da Vinci
+● William Shakespeare
+● Ada Lovelace
+● Nikola Tesla
+● Lionel Messi
+● Cristiano Ronaldo
+● Taylor Swift
+● Frida Kahlo
+Places
+● Eiffel Tower
+● Great Wall of China
+● Taj Mahal
+● Grand Canyon
+● Machu Picchu
+● Colosseum
+● Hagia Sophia
+● Statue of Liberty
+● Pyramids of Giza
+● Mount Everest
+You are free to ingest more data.
+Chunk
+The system should split documents into smaller chunks. You should define your own chunk size
+and strategy. For example, fixed size chunks or chunks with overlap. Please design around the
+assumption that documents can be large.
+Embed and Store
+The system should generate embeddings locally and store them in a vector database.
+You must use a local embedding model. No external API is allowed.
+You may implement one of the following:
+Option A
+Two vector stores
+one for people
+one for places
+Option B
+One vector store with metadata
+for example type equals person or place
+You must explain your design choice.
+Retrieve
+Given a user query, the system should retrieve relevant chunks from the vector store.
+The system should determine whether the query is about a person, a place, or both. Based on
+this decision, it should retrieve from the appropriate vector store or apply filtering.
+This logic can be simple. Keyword based or rule based approaches are acceptable.
+Generate
+Given the query and retrieved context, generate an answer using a local language model.
+The answer should
+be grounded in retrieved context
+avoid hallucination when possible
+return “I don’t know” if the answer is not in the data
+You may optionally show the source chunks used to generate the answer.
+Chat interface
+Provide a simple chat style UI or CLI that allows users to:
+● ask questions
+● receive answers
+● optionally view retrieved context
+● clear or reset the system
+Technical Constraints
+The system must run fully on localhost.
+Recommended stack:
+Language: Python
+Local model: Ollama
+Model options
+● llama3.2 3b
+● Phi3
+● mistral
+Embeddings
+● nomic embed text via Ollama
+● or sentence transformers
+Vector store: Chroma
+Database: SQLite
+UI: Streamlit or CLI
+No external LLM API is allowed.
+Demo Requirement
+You must submit a 5 minute demo video using Loom or unlisted YouTube.
+The video should include:
+● system overview
+● live demo of ingestion and question answering
+● technical decisions such as model choice and retrieval method
+● tradeoffs and limitations
+● possible improvements
+Code Submission
+All code must be uploaded to a public Github repository.
+The repository should include:
+● working source code for the full system
+● clear instructions to run the project locally
+● requirements file or dependency list
+● ingestion scripts for Wikipedia data
+● vector store creation logic
+● chat interface implementation
+The repository must be organized and easy to understand.
+At minimum, include:
+● README.md
+● Product_prd.md
+● recommendation.md
+● main application code
+The README should explain:
+● how to install dependencies
+● how to run the local model
+● how to ingest data
+● how to start the application
+● example queries
+The project should be runnable by the instructor by following only the README instructions
+without additional guidance.
+Output
+● Github repository with:
+○ working code
+○ PRD for AI to build the project product_prd.md
+○ Readme explaining how the system works readme.md
+○ Recommendation on production deployment recommendation.md
+○ Demo video link
+● Localhost runnable system
+Evaluation
+Your work will be evaluated in terms of:
+● functionality and correctness
+● quality of retrieval and answers
+● architectural sensibility
+● understanding of tradeoffs
+● clarity of demo and explanation
+Goal
+● Search retrieves information.
+● AI generates answers.
+● You combine both into a real system.
+You are building a simplified version of ChatGPT that runs locally on your machine.
+Example Questions
+People
+● Who was Albert Einstein and what is he known for
+● What did Marie Curie discover
+● Why is Nikola Tesla famous
+● Compare Lionel Messi and Cristiano Ronaldo
+● What is Frida Kahlo known for
+Places
+● Where is the Eiffel Tower located
+● Why is the Great Wall of China important
+● What is Machu Picchu
+● What was the Colosseum used for
+● Where is Mount Everest
+Mixed
+● Which famous place is located in Turkey
+● Which person is associated with electricity
+● Compare Albert Einstein and Nikola Tesla
+● Compare the Eiffel Tower and the Statue of Liberty
+Failure cases
+● Who is the president of Mars
+● Tell me about a random unknown person John Doe
+Optional Extensions
+You may implement additional features such as:
+● streaming responses
+● citations or source highlighting
+● chat history memory
+● comparing two different local models
+● latency measurement and optimization
+● caching responses
+● improving retrieval ranking
+● supporting comparison questions across people and places
