@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
@@ -30,14 +31,27 @@ def _safe_filename(title: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "_", title).strip("_")
 
 
-def _request_json(params: dict[str, str]) -> dict:
+def _request_json(params: dict[str, str], retries: int = 5) -> dict:
     query = urllib.parse.urlencode(params)
     request = urllib.request.Request(
         f"{API_URL}?{query}",
         headers={"User-Agent": USER_AGENT},
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return json.loads(response.read().decode("utf-8"))
+
+    for attempt in range(retries + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            if exc.code != 429 or attempt == retries:
+                raise RuntimeError(f"Wikipedia request failed with HTTP {exc.code}: {exc.reason}") from exc
+
+            retry_after = exc.headers.get("Retry-After")
+            wait_seconds = int(retry_after) if retry_after and retry_after.isdigit() else min(60, 5 * (attempt + 1))
+            print(f"Wikipedia rate limit hit. Waiting {wait_seconds} seconds before retrying...")
+            time.sleep(wait_seconds)
+
+    raise RuntimeError("Wikipedia request failed after retries")
 
 
 def fetch_wikipedia_page(title: str, entity_type: str, cache_dir: Path = RAW_DATA_DIR) -> WikiDocument:
